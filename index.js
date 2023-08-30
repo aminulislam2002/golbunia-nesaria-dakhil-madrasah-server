@@ -28,6 +28,18 @@ async function run() {
     const eventsCollection = database.collection("events");
     const noticesCollection = database.collection("notices");
 
+    app.get("/events", async (req, res) => {
+      const cursor = eventsCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/notices", async (req, res) => {
+      const cursor = noticesCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.post("/events", async (req, res) => {
       const event = req.body;
       const result = await eventsCollection.insertOne(event);
