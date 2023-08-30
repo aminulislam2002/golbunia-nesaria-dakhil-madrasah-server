@@ -25,8 +25,15 @@ async function run() {
     await client.connect();
 
     const database = client.db("madrasahDB");
+    const usersCollection = database.collection("users");
     const eventsCollection = database.collection("events");
     const noticesCollection = database.collection("notices");
+
+    app.get("/users", async (req, res) => {
+      const cursor = usersCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     app.get("/events", async (req, res) => {
       const cursor = eventsCollection.find();
@@ -51,6 +58,17 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await noticesCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exists" });
+      }
+      const result = await usersCollection.insertOne(user);
       res.send(result);
     });
 
