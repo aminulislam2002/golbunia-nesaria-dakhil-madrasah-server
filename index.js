@@ -60,6 +60,15 @@ async function run() {
       res.send(result);
     });
 
+    // Get user by id
+    app.get("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const result = await usersCollection.findOne(filter);
+      res.send(result);
+    });
+
+    // Get user by email
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
