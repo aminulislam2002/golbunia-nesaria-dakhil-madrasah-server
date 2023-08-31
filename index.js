@@ -29,24 +29,120 @@ async function run() {
     const eventsCollection = database.collection("events");
     const noticesCollection = database.collection("notices");
 
+    // Get all users
     app.get("/users", async (req, res) => {
       const cursor = usersCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
 
+    // Get only all admins
+    app.get("/users/admins", async (req, res) => {
+      const query = { role: "admin" };
+      const admins = usersCollection.find(query);
+      const result = await admins.toArray();
+      res.send(result);
+    });
+
+    // Get only all teachers
+    app.get("/users/teachers", async (req, res) => {
+      const query = { role: "teacher" };
+      const teachers = usersCollection.find(query);
+      const result = await teachers.toArray();
+      res.send(result);
+    });
+
+    // Get only all students
+    app.get("/users/students", async (req, res) => {
+      const query = { role: "student" };
+      const students = usersCollection.find(query);
+      const result = await students.toArray();
+      res.send(result);
+    });
+
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+
+    // Get admin user
+    app.get("/users/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = { admin: user?.role === "admin" };
+      res.send(result);
+    });
+
+    // Get teacher user
+    app.get("/users/teacher/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = { teacher: user?.role === "teacher" };
+      res.send(result);
+    });
+
+    // Get student user
+    app.get("/users/student/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = { student: user?.role === "student" };
+      res.send(result);
+    });
+
+    // Get all events
     app.get("/events", async (req, res) => {
       const cursor = eventsCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
 
+    // Get all notices
     app.get("/notices", async (req, res) => {
       const cursor = noticesCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
 
+    // Make admin from teacher
+    app.patch("/users/makeAdmin/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // Remove admin as teacher
+    app.patch("/users/removeAdmin/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "teacher",
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // Delete any user
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // Delete a event
     app.delete("/events/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -54,6 +150,7 @@ async function run() {
       res.send(result);
     });
 
+    // Delete a notice
     app.delete("/notices/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -61,6 +158,7 @@ async function run() {
       res.send(result);
     });
 
+    // Post and user
     app.post("/users", async (req, res) => {
       const user = req.body;
       const query = { email: user.email };
@@ -72,12 +170,14 @@ async function run() {
       res.send(result);
     });
 
+    // Post a event
     app.post("/events", async (req, res) => {
       const event = req.body;
       const result = await eventsCollection.insertOne(event);
       res.send(result);
     });
 
+    // Post a notice
     app.post("/notices", async (req, res) => {
       const notice = req.body;
       const result = await noticesCollection.insertOne(notice);
