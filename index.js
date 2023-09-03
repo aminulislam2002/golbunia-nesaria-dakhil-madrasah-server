@@ -143,6 +143,30 @@ async function run() {
       res.send(result);
     });
 
+    // Update student user data
+    app.patch("/user/student/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateUser = req.body;
+      console.log(updateUser);
+      const updateDoc = {
+        $set: {
+          name: updateUser.name,
+          nickName: updateUser.nickName,
+          fatherName: updateUser.fatherName,
+          motherName: updateUser.motherName,
+          mobileNumber: updateUser.mobileNumber,
+          bloodGroup: updateUser.bloodGroup,
+          birthdayDate: updateUser.birthdayDate,
+          madrasahName: updateUser.madrasahName,
+          class: updateUser.class,
+          roll: updateUser.roll,
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // Delete any user
     app.delete("/users/:id", async (req, res) => {
       const id = req.params.id;
