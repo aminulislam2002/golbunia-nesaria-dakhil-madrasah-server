@@ -152,6 +152,8 @@ async function run() {
       const updateDoc = {
         $set: {
           name: updateUser.name,
+          bio: updateUser.bio,
+          position: updateUser.position,
           nickName: updateUser.nickName,
           fatherName: updateUser.fatherName,
           motherName: updateUser.motherName,
@@ -161,6 +163,7 @@ async function run() {
           madrasahName: updateUser.madrasahName,
           class: updateUser.class,
           roll: updateUser.roll,
+          address: updateUser.address,
         },
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
