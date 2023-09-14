@@ -37,31 +37,43 @@ async function run() {
     });
 
     // Get only all admins
-    app.get("/users/admins", async (req, res) => {
-      const query = { role: "admin" };
-      const admins = usersCollection.find(query);
-      const result = await admins.toArray();
-      res.send(result);
+    app.get("/getAllAdmins", async (req, res) => {
+      try {
+        const query = { role: "admin" };
+        const admins = await usersCollection.find(query).toArray();
+        res.send(admins);
+      } catch (error) {
+        console.error("Error fetching admins:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
     });
 
     // Get only all teachers
-    app.get("/users/teachers", async (req, res) => {
-      const query = { role: "teacher" };
-      const teachers = usersCollection.find(query);
-      const result = await teachers.toArray();
-      res.send(result);
+    app.get("/getAllTeachers", async (req, res) => {
+      try {
+        const query = { role: "teacher" };
+        const teachers = await usersCollection.find(query).toArray();
+        res.send(teachers);
+      } catch (error) {
+        console.error("Error fetching teachers:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
     });
 
-    // Get only all students
-    app.get("/users/students", async (req, res) => {
-      const query = { role: "student" };
-      const students = usersCollection.find(query);
-      const result = await students.toArray();
-      res.send(result);
+    // Get all students
+    app.get("/getAllStudents", async (req, res) => {
+      try {
+        const query = { role: "student" };
+        const students = await usersCollection.find(query).toArray();
+        res.send(students);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
     });
 
-    // Get user by id
-    app.get("/users/:id", async (req, res) => {
+    // Get an user by user id
+    app.get("/getUserById/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const result = await usersCollection.findOne(filter);
@@ -69,7 +81,7 @@ async function run() {
     });
 
     // Get user by email
-    app.get("/user/:email", async (req, res) => {
+    app.get("/getUserByEmail/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const result = await usersCollection.findOne(query);
@@ -77,7 +89,7 @@ async function run() {
     });
 
     // Get admin user
-    app.get("/users/admin/:email", async (req, res) => {
+    app.get("/getAdmin/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
@@ -86,7 +98,7 @@ async function run() {
     });
 
     // Get teacher user
-    app.get("/users/teacher/:email", async (req, res) => {
+    app.get("/getTeacher/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
@@ -95,7 +107,7 @@ async function run() {
     });
 
     // Get student user
-    app.get("/users/student/:email", async (req, res) => {
+    app.get("/getStudent/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
@@ -117,8 +129,23 @@ async function run() {
       res.send(result);
     });
 
+    // Update student user data
+    app.patch("/userUpdate/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateUser = req.body;
+      console.log(updateUser);
+      const updateDoc = {
+        $set: {
+          ...updateUser,
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // Make admin from teacher
-    app.patch("/users/makeAdmin/:id", async (req, res) => {
+    app.patch("/makeAdmin/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -131,7 +158,7 @@ async function run() {
     });
 
     // Remove admin as teacher
-    app.patch("/users/removeAdmin/:id", async (req, res) => {
+    app.patch("/removeAdmin/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -143,35 +170,8 @@ async function run() {
       res.send(result);
     });
 
-    // Update student user data
-    app.patch("/user/student/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updateUser = req.body;
-      console.log(updateUser);
-      const updateDoc = {
-        $set: {
-          name: updateUser.name,
-          bio: updateUser.bio,
-          position: updateUser.position,
-          nickName: updateUser.nickName,
-          fatherName: updateUser.fatherName,
-          motherName: updateUser.motherName,
-          mobileNumber: updateUser.mobileNumber,
-          bloodGroup: updateUser.bloodGroup,
-          birthdayDate: updateUser.birthdayDate,
-          madrasahName: updateUser.madrasahName,
-          class: updateUser.class,
-          roll: updateUser.roll,
-          address: updateUser.address,
-        },
-      };
-      const result = await usersCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
-
     // Delete any user
-    app.delete("/users/:id", async (req, res) => {
+    app.delete("/deleteUser/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
@@ -179,7 +179,7 @@ async function run() {
     });
 
     // Delete a event
-    app.delete("/events/:id", async (req, res) => {
+    app.delete("/deleteEvent/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await eventsCollection.deleteOne(query);
@@ -187,7 +187,7 @@ async function run() {
     });
 
     // Delete a notice
-    app.delete("/notices/:id", async (req, res) => {
+    app.delete("/deleteNotice/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await noticesCollection.deleteOne(query);
